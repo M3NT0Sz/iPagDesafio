@@ -1,12 +1,13 @@
-version: '3.8'
-
 services:
   app:
-    image: php:8.2-apache
+    build: .
     container_name: ipag_app
     volumes:
       - ./public:/var/www/html
       - ./src:/var/www/src
+      - ./vendor:/var/www/vendor
+      - ./migrations:/var/www/migrations
+      - ./db_migrations:/var/www/db_migrations
     ports:
       - "8080:80"
     depends_on:

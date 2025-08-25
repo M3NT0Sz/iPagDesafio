@@ -1,3 +1,11 @@
 <?php
-// Ponto de entrada da aplicação
-// Inicialização do Slim será feita posteriormente
+require __DIR__ . '/../vendor/autoload.php';
+
+use Slim\Factory\AppFactory;
+
+$app = AppFactory::create();
+
+$routes = require __DIR__ . '/routes.php';
+$routes($app);
+
+$app->run();

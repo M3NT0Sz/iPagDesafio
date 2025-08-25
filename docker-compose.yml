@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  app:
+    image: php:8.2-apache
+    container_name: ipag_app
+    volumes:
+      - ./public:/var/www/html
+      - ./src:/var/www/src
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+      - rabbitmq
+
+  db:
+    image: mysql:8.0
+    container_name: ipag_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ipag
+      MYSQL_USER: ipaguser
+      MYSQL_PASSWORD: ipagpass
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ipag_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  db_data:

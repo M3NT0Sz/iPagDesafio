@@ -58,3 +58,25 @@
 ---
 
 > **Observação:** Este README será atualizado conforme o andamento do projeto, incluindo diagramas, instruções de uso e detalhes técnicos.
+
+---
+
+## Estrutura do Projeto
+
+```
+iPagDesafio/
+├── docker-compose.yml         # Orquestração dos serviços (PHP, MySQL, RabbitMQ)
+├── public/                    # Document root do Apache/PHP (acessível via navegador)
+├── src/                       # Código-fonte da aplicação (ex: index.php, controllers, models)
+├── migrations/                # Scripts de criação/atualização do banco de dados
+├── tests/                     # Testes automatizados
+├── README.md                  # Documentação principal do projeto
+```
+
+**Descrição das pastas:**
+- `public/`: arquivos públicos acessíveis via web (ex: index.php, assets)
+- `src/`: código-fonte da aplicação PHP
+- `migrations/`: scripts SQL para versionamento do banco de dados
+- `tests/`: scripts e arquivos de teste
+
+Essa estrutura facilita a organização e manutenção do projeto.

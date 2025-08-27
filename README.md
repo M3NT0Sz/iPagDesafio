@@ -22,7 +22,7 @@
 	- ✔️ Implementação de endpoints CRUD (POST /orders, GET /orders/{order_id}, PUT /orders/{order_id}/status, GET /orders, GET /orders/summary)
 - **Dia 4:**
 	- ✔️ Finalização de endpoints
-	- Integração com RabbitMQ (em andamento)
+	- ✔️ Integração com RabbitMQ (publicação na fila ao atualizar status)
 	- Testes manuais (parcialmente realizados)
 
 ### Fase 3: Implementação do Worker (Dias 5–6)
@@ -51,7 +51,7 @@
 | 1    | Planejamento, setup Docker, estrutura inicial do repositório | ✔️ |
 | 2    | Modelagem de dados, definição de API e workflow | ✔️ |
 | 3    | Implementação endpoints básicos da API (CRUD) | ✔️ |
-| 4    | Atualização de status + integração com RabbitMQ | Parcial |
+| 4    | Atualização de status + integração com RabbitMQ | ✔️ |
 | 5    | Desenvolvimento do worker consumidor RabbitMQ |  |
 | 6    | Refinamento, testes e tratamento de erros |  |
 | 7    | Documentação completa, testes finais e ajustes finais |  |

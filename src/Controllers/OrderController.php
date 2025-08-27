@@ -1,5 +1,8 @@
 <?php
+
 namespace App\Controllers;
+
+use PhpAmqpLib\Message\AMQPMessage;
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -126,7 +129,8 @@ class OrderController
 
     public function updateStatus(Request $request, Response $response, $args)
     {
-        $pdo = require __DIR__ . '/../Utils/db.php';
+    $pdo = require __DIR__ . '/../Utils/db.php';
+    require_once __DIR__ . '/../Utils/rabbitmq.php';
         $orderId = $args['order_id'] ?? null;
         $body = $request->getBody()->getContents();
         $data = json_decode($body, true);
@@ -155,7 +159,30 @@ class OrderController
         $stmt = $pdo->prepare('UPDATE orders SET status = ?, updated_at = NOW() WHERE id = ?');
         $stmt->execute([$newStatus, $orderId]);
 
-        // Registrar log de notificação (simples, sem RabbitMQ por enquanto)
+        // Publicar mensagem no RabbitMQ
+        try {
+            $connection = getRabbitConnection();
+            $channel = $connection->channel();
+            $queue = 'order_status_updates';
+            $channel->queue_declare($queue, false, true, false, false);
+            $msgData = [
+                'order_id' => $orderId,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'notes' => $notes,
+                'timestamp' => date('c'),
+                'user_id' => 'system'
+            ];
+            $msg = new AMQPMessage(json_encode($msgData), ['content_type' => 'application/json']);
+            $channel->basic_publish($msg, '', $queue);
+            $channel->close();
+            $connection->close();
+        } catch (\Throwable $e) {
+            // Apenas loga erro, mas não impede fluxo
+            error_log('Erro ao publicar no RabbitMQ: ' . $e->getMessage());
+        }
+
+        // Registrar log de notificação
         $stmt = $pdo->prepare('INSERT INTO notification_logs (order_id, old_status, new_status, message) VALUES (?, ?, ?, ?)');
         $stmt->execute([$orderId, $oldStatus, $newStatus, $notes]);
 

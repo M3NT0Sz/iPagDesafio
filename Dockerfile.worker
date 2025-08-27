@@ -14,11 +14,9 @@ WORKDIR /var/www
 COPY composer.json composer.lock ./
 RUN composer install --no-interaction --no-scripts --no-autoloader || true
 
-# Copia código do worker
-COPY worker.php ./
 COPY src/ ./src/
 COPY vendor/ ./vendor/
 COPY db_migrations/ ./db_migrations/
 COPY migrations/ ./migrations/
 
-CMD ["php", "/var/www/worker.php"]
+# CMD para worker PHP removido. Use worker Python conforme README.

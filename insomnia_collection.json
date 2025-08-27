@@ -1,75 +1,88 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2025-08-27T00:00:00.000Z",
+  "__export_date": "2025-08-27T18:00:00.000Z",
   "__export_source": "insomnia.desktop.app:v2025.8.27",
   "resources": [
     {
-      "_id": "wrk_ipagdesafio_2025",
+      "_id": "wrk_ipagdesafio",
       "created": 1690000000000,
-      "description": "Workspace para testes da API iPagDesafio.",
+      "description": "Workspace para testar todos os endpoints da API iPagDesafio.",
       "modified": 1690000000000,
-      "name": "iPagDesafio API",
+      "name": "iPagDesafio",
       "parentId": null,
-      "type": "workspace"
+      "_type": "workspace"
     },
     {
-      "_id": "env_ipagdesafio_localhost",
-      "created": 1690000000001,
+      "_id": "env_ipagdesafio",
+      "parentId": "wrk_ipagdesafio",
+      "name": "Base Environment",
       "data": {
         "base_url": "http://localhost:8080"
       },
-      "modified": 1690000000001,
-      "name": "Base Localhost",
-      "parentId": "wrk_ipagdesafio_2025",
-      "type": "environment"
+      "_type": "environment"
     },
     {
-      "_id": "req_health_check",
-      "created": 1690000000002,
-      "modified": 1690000000002,
-      "method": "GET",
-      "name": "Health Check",
-      "parentId": "wrk_ipagdesafio_2025",
-      "type": "request",
-      "url": "{{ base_url }}/health"
+      "_id": "fld_orders",
+      "parentId": "wrk_ipagdesafio",
+      "name": "Orders",
+      "_type": "request_group"
     },
     {
-      "_id": "req_criar_pedido",
-      "created": 1690000000003,
-      "modified": 1690000000003,
+      "_id": "req_post_order",
+      "parentId": "fld_orders",
+      "name": "Criar Pedido (POST /orders)",
       "method": "POST",
-      "name": "Criar Pedido",
-      "parentId": "wrk_ipagdesafio_2025",
-      "type": "request",
       "url": "{{ base_url }}/orders",
       "body": {
         "mimeType": "application/json",
         "text": "{\n  \"customer\": {\n    \"id\": 1,\n    \"name\": \"Fulano de Tal\",\n    \"document\": \"12345678900\",\n    \"email\": \"fulano@email.com\",\n    \"phone\": \"11999999999\"\n  },\n  \"order\": {\n    \"total_value\": 150.00,\n    \"items\": [\n      {\n        \"product_name\": \"Produto 1\",\n        \"quantity\": 2,\n        \"unit_value\": 50.00\n      },\n      {\n        \"product_name\": \"Produto 2\",\n        \"quantity\": 1,\n        \"unit_value\": 50.00\n      }\n    ]\n  }\n}"
       },
-      "headers": [
-        { "name": "Content-Type", "value": "application/json" }
-      ]
+      "_type": "request"
     },
     {
-      "_id": "req_listar_pedidos",
-      "created": 1690000000004,
-      "modified": 1690000000004,
+      "_id": "req_get_orders",
+      "parentId": "fld_orders",
+      "name": "Listar Pedidos (GET /orders)",
       "method": "GET",
-      "name": "Listar Pedidos",
-      "parentId": "wrk_ipagdesafio_2025",
-      "type": "request",
-      "url": "{{ base_url }}/orders"
+      "url": "{{ base_url }}/orders",
+      "_type": "request"
     },
     {
-      "_id": "req_resumo_pedidos",
-      "created": 1690000000005,
-      "modified": 1690000000005,
+      "_id": "req_get_order",
+      "parentId": "fld_orders",
+      "name": "Consultar Pedido (GET /orders/{order_id})",
       "method": "GET",
-      "name": "Resumo dos Pedidos",
-      "parentId": "wrk_ipagdesafio_2025",
-      "type": "request",
-      "url": "{{ base_url }}/orders/summary"
+      "url": "{{ base_url }}/orders/1",
+      "_type": "request"
+    },
+    {
+      "_id": "req_put_order_status",
+      "parentId": "fld_orders",
+      "name": "Atualizar Status (PUT /orders/{order_id}/status)",
+      "method": "PUT",
+      "url": "{{ base_url }}/orders/1/status",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"PAID\",\n  \"notes\": \"Pagamento confirmado via PIX\"\n}"
+      },
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_orders_summary",
+      "parentId": "fld_orders",
+      "name": "Resumo de Pedidos (GET /orders/summary)",
+      "method": "GET",
+      "url": "{{ base_url }}/orders/summary",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_health",
+      "parentId": "wrk_ipagdesafio",
+      "name": "Health Check (GET /health)",
+      "method": "GET",
+      "url": "{{ base_url }}/health",
+      "_type": "request"
     }
   ]
 }

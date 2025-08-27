@@ -1,4 +1,0 @@
-
-// Arquivo removido: não utilizado.
-
-

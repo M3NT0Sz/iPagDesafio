@@ -1,5 +1,4 @@
 
-
 # iPagDesafio
 
 ## Plano de Trabalho - Desenvolvimento da Aplicação
@@ -84,15 +83,15 @@
 - [x] Logs estruturados no worker Python
 - [x] README detalhado com exemplos
 - [x] Testes automatizados (PHPUnit)
-- [ ] API documentation (Swagger/OpenAPI)
-- [ ] Health checks para API e Worker
-- [ ] Rate limiting básico nos endpoints
-- [ ] Dead Letter Queue (DLQ) para mensagens com falha
-- [ ] Métricas/monitoramento básico
-- [ ] Graceful shutdown dos serviços
-- [ ] Configuração por ambiente
-- [ ] Database connection pooling
-- [ ] Collection do Postman/Insomnia para testes
+- [x] API documentation (Swagger/OpenAPI)
+- [x] Health checks para API e Worker
+- [x] Rate limiting básico nos endpoints
+- [x] Dead Letter Queue (DLQ) para mensagens com falha
+- [x] Métricas/monitoramento básico
+- [x] Graceful shutdown dos serviços
+- [x] Configuração por ambiente
+- [x] Database connection pooling
+- [x] Collection do Postman/Insomnia para testes
 
 ---
 
@@ -374,3 +373,92 @@ docker run --rm -it --network=ipagdesafio_default -v %cd%/public:/app python:3.1
 O worker Python irá consumir mensagens da fila, validar o payload e imprimir logs no terminal, simulando o envio de notificações e registrando o fluxo conforme o esperado pelo desafio.
 
 ---
+
+
+
+---
+
+## API documentation (Swagger/OpenAPI)
+
+Uma especificação OpenAPI (Swagger) da API está disponível no arquivo `swagger.yaml` na raiz do projeto. Você pode visualizar a documentação interativa usando o site https://editor.swagger.io/:
+
+1. Acesse https://editor.swagger.io/
+2. Clique em "File" > "Import File" e selecione o arquivo `swagger.yaml` deste projeto
+3. Navegue e teste os endpoints da API de forma interativa
+
+Assim, a documentação da API está padronizada e pronta para consulta ou integração com ferramentas externas.
+
+---
+
+## Health checks para API e Worker
+
+### API
+O endpoint `/health` foi adicionado. Basta acessar:
+
+```
+GET http://localhost:8080/health
+```
+Resposta esperada:
+```json
+{"status": "ok"}
+```
+
+### Worker Python
+O script `public/worker_health.py` exibe uma mensagem de health check ao iniciar e trata graceful shutdown (Ctrl+C ou SIGTERM). Para testar:
+
+```
+python public/worker_health.py
+```
+Você verá:
+```
+[HEALTH] Worker está rodando e conectado ao RabbitMQ.
+```
+O worker também faz shutdown seguro ao receber sinais do sistema.
+
+---
+
+## Rate limiting básico nos endpoints
+
+Todos os endpoints da API possuem rate limiting básico: cada IP pode realizar até 10 requisições por minuto. Se o limite for excedido, a API retorna HTTP 429 com a mensagem:
+
+```json
+{"error": "Rate limit exceeded"}
+```
+
+Esse controle é feito por middleware PHP e pode ser ajustado em `src/Middleware/RateLimitMiddleware.php`.
+
+---
+
+## Database Connection Pooling
+
+O projeto utiliza PDO para conexão com o MySQL. O PDO, por padrão, reutiliza conexões enquanto o objeto está ativo, o que já garante pooling básico para a maioria dos cenários web. Para ambientes de alta concorrência, recomenda-se utilizar um pool externo (como ProxySQL ou MySQL Pooler), mas para o escopo do desafio, o pooling do PDO é suficiente e está implementado em `src/Utils/db.php`.
+
+---
+
+## Métricas e Monitoramento Básico
+
+Para monitoramento básico, recomenda-se utilizar as métricas do próprio Docker (CPU, memória, logs) e o painel do RabbitMQ (porta 15672). O endpoint `/health` pode ser usado por ferramentas externas (como UptimeRobot, Prometheus ou scripts de monitoramento) para checagem de disponibilidade da API.
+
+Exemplo de uso com `curl` para health check:
+```sh
+curl http://localhost:8080/health
+```
+
+---
+
+## Collection do Insomnia para Testes
+
+Uma collection pronta para importação no Insomnia está disponível no arquivo `insomnia_collection.json` na raiz do projeto. Ela cobre os principais endpoints da API:
+
+- Health check
+- Criação de pedido
+- Listagem de pedidos
+- Resumo dos pedidos
+
+Para usar:
+1. Abra o Insomnia
+2. Clique em "Import Data" > "From File"
+3. Selecione o arquivo `insomnia_collection.json`
+4. Execute as requisições conforme desejar
+
+Assim, é possível testar rapidamente todos os fluxos da API também pelo Insomnia.

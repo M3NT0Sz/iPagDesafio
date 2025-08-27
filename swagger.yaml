@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: iPagDesafio API
+  version: 1.0.0
+  description: API REST para gerenciamento de pedidos, integração com RabbitMQ e notificações.
+servers:
+  - url: http://localhost:8080
+paths:
+  /orders:
+    post:
+      summary: Cria um novo pedido
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Pedido criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+    get:
+      summary: Lista pedidos
+      responses:
+        '200':
+          description: Lista de pedidos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderResponse'
+  /orders/{order_id}:
+    get:
+      summary: Consulta um pedido específico
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Pedido encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '404':
+          description: Pedido não encontrado
+    put:
+      summary: Atualiza status do pedido
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStatusRequest'
+      responses:
+        '200':
+          description: Status atualizado
+  /orders/summary:
+    get:
+      summary: Retorna resumo estatístico dos pedidos
+      responses:
+        '200':
+          description: Resumo
+  /health:
+    get:
+      summary: Health check da API
+      responses:
+        '200':
+          description: API saudável
+components:
+  schemas:
+    CreateOrderRequest:
+      type: object
+      properties:
+        customer:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            document:
+              type: string
+            email:
+              type: string
+            phone:
+              type: string
+        order:
+          type: object
+          properties:
+            total_value:
+              type: number
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/OrderItem'
+    OrderItem:
+      type: object
+      properties:
+        product_name:
+          type: string
+        quantity:
+          type: integer
+        unit_value:
+          type: number
+    OrderResponse:
+      type: object
+      properties:
+        order_id:
+          type: integer
+        order_number:
+          type: string
+        status:
+          type: string
+        total_value:
+          type: number
+        customer:
+          type: object
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        created_at:
+          type: string
+    UpdateStatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+        notes:
+          type: string

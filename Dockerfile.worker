@@ -1,0 +1,24 @@
+FROM php:8.1-cli
+
+# Instala extensões necessárias
+RUN apt-get update && apt-get install -y git zip unzip default-mysql-client \
+    && docker-php-ext-install pdo pdo_mysql sockets bcmath
+
+# Instala Composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+    && rm composer-setup.php
+
+# Instala dependências do projeto
+WORKDIR /var/www
+COPY composer.json composer.lock ./
+RUN composer install --no-interaction --no-scripts --no-autoloader || true
+
+# Copia código do worker
+COPY worker.php ./
+COPY src/ ./src/
+COPY vendor/ ./vendor/
+COPY db_migrations/ ./db_migrations/
+COPY migrations/ ./migrations/
+
+CMD ["php", "/var/www/worker.php"]

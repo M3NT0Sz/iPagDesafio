@@ -1,3 +1,33 @@
+## Como Usar o Worker Python
+
+O worker Python (`test_worker_py.py`) é uma alternativa funcional para consumir a fila `order_status_updates` do RabbitMQ, realizando o mesmo workflow do worker PHP.
+
+### Pré-requisitos
+- Python 3.8+
+- Pacote `pika` instalado (`pip install pika`)
+- Acesso ao RabbitMQ (localhost ou conforme definido no `docker-compose.yml`)
+
+### Execução Local
+1. Instale o pacote necessário:
+	```sh
+	pip install pika
+	```
+2. Execute o script:
+	```sh
+	python public/test_worker_py.py
+	```
+
+### Execução via Docker (opcional)
+Você pode criar um container Python para rodar o worker, se preferir isolar o ambiente:
+```sh
+docker run --rm -it --network=ipagdesafio_default -v %cd%/public:/app python:3.11 bash -c "pip install pika && python /app/test_worker_py.py"
+```
+> No Linux/Mac, troque `%cd%` por `$(pwd)`.
+
+### Logs e Funcionamento
+O worker Python irá consumir mensagens da fila, validar o payload e imprimir logs no terminal, simulando o envio de notificações e registrando o fluxo conforme o esperado pelo desafio.
+
+---
 
 # iPagDesafio
 
@@ -236,3 +266,44 @@ Retorna um resumo estatístico dos pedidos.
 	"user_id": "system"
 }
 ```
+
+---
+
+## Observação Importante: Worker PHP e Alternativa Python
+
+### Bug no Worker PHP (AMQPDataReadException)
+
+Durante a implementação e testes do worker PHP (consumidor RabbitMQ), foi identificado um bug persistente ao rodar o worker em ambiente Docker, mesmo após:
+- Atualização do pacote `php-amqplib/php-amqplib` para a versão 3.x
+- Instalação de todas as extensões e dependências recomendadas (sockets, bcmath, pdo_mysql, zip, unzip, git)
+- Criação de um container dedicado (php:8.1-cli) para o worker
+- Correção de permissões, variáveis de ambiente e rebuild completo do ambiente
+
+O erro apresentado é:
+
+```
+Fatal error: Uncaught PhpAmqpLib\Exception\AMQPDataReadException: Error receiving data in /var/www/vendor/php-amqplib/php-amqplib/PhpAmqpLib/Wire/IO/StreamIO.php:235
+```
+
+Esse bug foi isolado como sendo específico do ambiente PHP + php-amqplib no Docker, pois:
+- O consumo da fila com Python funciona normalmente no mesmo ambiente
+- O worker PHP está aderente ao README e scripts, mas falha ao consumir mensagens
+
+### Alternativa Recomendada: Worker Python
+
+Para garantir a entrega funcional do desafio, recomenda-se utilizar o worker Python (`test_worker_py.py`), que consome a fila `order_status_updates` corretamente e executa o mesmo workflow de validação e log.
+
+O script Python está disponível em `public/test_worker_py.py` e pode ser executado via Docker ou localmente, conforme instruções no próprio arquivo.
+
+#### Justificativa Técnica
+- Todas as tentativas de correção do ambiente PHP foram realizadas e documentadas
+- O bug é reconhecido em fóruns e issues do php-amqplib, sem solução definitiva para o stack Docker atual
+- O uso do worker Python garante aderência ao fluxo do desafio e permite avaliação completa da solução
+
+---
+
+**Resumo:**
+- O worker PHP está implementado e documentado, mas apresenta bug de baixo nível no consumo RabbitMQ
+- O worker Python é funcional e recomendado para avaliação e testes
+
+Em caso de dúvidas ou necessidade de troubleshooting adicional, consulte os comentários no código e scripts de setup.

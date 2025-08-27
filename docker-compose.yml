@@ -8,11 +8,38 @@ services:
       - ./vendor:/var/www/vendor
       - ./migrations:/var/www/migrations
       - ./db_migrations:/var/www/db_migrations
+      - ./worker.php:/var/www/worker.php
+      - ./test_worker.php:/var/www/test_worker.php
     ports:
       - "8080:80"
     depends_on:
       - db
       - rabbitmq
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: ipag_worker
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      DB_HOST: db
+      DB_NAME: ipag
+      DB_USER: ipaguser
+      DB_PASS: ipagpass
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: guest
+      RABBITMQ_PASS: guest
+    volumes:
+      - ./worker.php:/var/www/worker.php
+      - ./src:/var/www/src
+      - ./vendor:/var/www/vendor
+      - ./db_migrations:/var/www/db_migrations
+      - ./migrations:/var/www/migrations
+
 
   db:
     image: mysql:8.0

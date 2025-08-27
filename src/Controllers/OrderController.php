@@ -75,8 +75,8 @@ class OrderController
             'created_at' => date('c')
         ];
 
-        $response->getBody()->write(json_encode($result));
-        return $response->withHeader('Content-Type', 'application/json');
+    $response->getBody()->write(json_encode($result));
+    return $response->withStatus(201)->withHeader('Content-Type', 'application/json');
     }
 
     public function getOrder(Request $request, Response $response, $args)

@@ -35,73 +35,46 @@
 	- ✔️ Tratamento de erros
 	- ✔️ Testes adicionais (incluindo testes automatizados com PHPUnit)
 
-### Fase 4: Documentação & Preparação Final (Dia 7)
-**Dia 7:**
-	- ✔️ README completo e atualizado
-	- ✔️ Diagrama da arquitetura (se aplicável)
-	- ✔️ Testes finais (automatizados e manuais)
-	- ✔️ Ajustes e entrega
+# iPagDesafio
+
+API RESTful para gerenciamento de pedidos, integração com RabbitMQ e processamento assíncrono via worker Python. Projeto desenvolvido para o desafio iPag, com Docker Compose, testes automatizados, documentação Swagger e diferenciais avançados.
 
 ---
 
-## Cronograma Resumido
+## Como Executar
 
-| Dia  | Atividades | Status |
-|------|------------|--------|
-| 1    | Planejamento, setup Docker, estrutura inicial do repositório | ✔️ |
-| 2    | Modelagem de dados, definição de API e workflow | ✔️ |
-| 3    | Implementação endpoints básicos da API (CRUD) | ✔️ |
-| 4    | Atualização de status + integração com RabbitMQ | ✔️ |
-| 5    | Desenvolvimento do worker consumidor RabbitMQ (PHP implementado, bug documentado; Python funcional) | ✔️ |
-| 6    | Refinamento, testes (automatizados) e tratamento de erros | ✔️ |
-| 7    | Documentação completa, testes finais e entrega | ✔️ |
+1. **Clone o repositório e suba o ambiente:**
+   ```sh
+   docker-compose up --build
+   ```
+2. **Acesse a API:** http://localhost:8080
+3. **Acesse o RabbitMQ:** http://localhost:15672 (user: guest, pass: guest)
+4. **Execute o worker Python:**
+   ```sh
+   docker-compose exec app python public/worker_health.py
+   ```
+5. **Rode os testes:**
+   ```sh
+   composer install
+   php vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/Api/OrdersApiTest.php
+   ```
 
 ---
 
----
+## Checklist de Entrega
 
-## Checklist Final do Desafio iPag
-
-### Requisitos Obrigatórios
-- [x] Plano de trabalho detalhado (tarefas, fases, cronograma)
-- [x] API Backend (PHP, Slim, MVC, boas práticas)
-- [x] Banco de Dados MySQL (migrations, scripts SQL, estrutura sugerida)
-- [x] RabbitMQ + Worker (fila `order_status_updates`, publisher na API, consumer implementado em PHP e Python, logs)
-- [x] Endpoints REST (POST /orders, GET /orders/{order_id}, PUT /orders/{order_id}/status, GET /orders, GET /orders/summary)
-- [x] Estrutura de dados (exemplos de payloads, resposta, status, transições)
-- [x] Regras de negócio (status válidos, transições, restrições, publicação na fila)
-- [x] Worker de notificação (consome fila, valida, loga, simula notificação)
-- [x] Docker Compose funcional (app, db, rabbitmq, worker)
-- [x] README detalhado (instruções, decisões técnicas, estrutura, bugs, alternativas)
-- [x] Migrations versionadas
-- [x] Decisões técnicas documentadas
+- [x] API REST (Slim)
+- [x] Banco MySQL (migrations)
+- [x] RabbitMQ + Worker Python
+- [x] Endpoints REST completos
 - [x] Testes automatizados (PHPUnit)
-- [x] Facilidade de execução (instruções claras, comandos, exemplos)
-
-### Diferenciais (opcionais)
-- [x] Validação robusta de dados de entrada (validações básicas implementadas)
-- [x] Logs estruturados no worker Python
-- [x] README detalhado com exemplos
-- [x] Testes automatizados (PHPUnit)
-- [x] API documentation (Swagger/OpenAPI)
-- [x] Health checks para API e Worker
-- [x] Rate limiting básico nos endpoints
-- [x] Dead Letter Queue (DLQ) para mensagens com falha
-- [x] Métricas/monitoramento básico
-- [x] Graceful shutdown dos serviços
-- [x] Configuração por ambiente
-- [x] Database connection pooling
-- [x] Collection do Postman/Insomnia para testes
-
----
-
-
-> **Observação:** Este README será atualizado conforme o andamento do projeto, incluindo diagramas, instruções de uso e detalhes técnicos.
+- [x] Docker Compose funcional
+- [x] Documentação Swagger/OpenAPI
+- [x] Health check, rate limiting, DLQ, pooling, métricas, collection Insomnia/Postman
 
 ---
 
 ## Estrutura do Projeto
-
 
 ```
 iPagDesafio/
@@ -114,15 +87,12 @@ iPagDesafio/
 ├── README.md                  # Documentação principal do projeto
 ```
 
-
 **Descrição das pastas:**
 - `public/`: arquivos públicos acessíveis via web (ex: index.php, assets)
 - `src/`: código-fonte da aplicação PHP
 - `db_migrations/`: scripts SQL para versionamento do banco de dados
 - `migrations/`: reservado para futuras migrações automatizadas
 - `tests/`: scripts e arquivos de teste
-
-Essa estrutura facilita a organização e manutenção do projeto.
 
 ---
 
@@ -182,20 +152,6 @@ Para rodar as migrations manualmente:
 ```sh
 docker-compose exec app bash -c "mysql --ssl=0 -h db -uipaguser -pipagpass ipag < /var/www/db_migrations/001_create_customers.sql && mysql --ssl=0 -h db -uipaguser -pipagpass ipag < /var/www/db_migrations/002_create_orders.sql && mysql --ssl=0 -h db -uipaguser -pipagpass ipag < /var/www/db_migrations/003_create_order_items.sql && mysql --ssl=0 -h db -uipaguser -pipagpass ipag < /var/www/db_migrations/004_create_notification_logs.sql"
 ```
-
----
-
-## Checklist de Fechamento do Dia 2
-
-- [x] Estrutura do projeto criada e documentada
-- [x] Scripts de banco de dados versionados em `db_migrations/`
-- [x] Endpoints REST definidos e documentados
-- [x] Workflow do Worker descrito
-- [x] Exemplos de payloads e mensagens documentados
-- [x] Ambiente Docker funcional e testado
-- [x] Testes manuais dos endpoints principais realizados
-
-Pronto para avançar para a implementação do Worker e integração RabbitMQ no Dia 3!
 
 ---
 
@@ -277,188 +233,83 @@ Retorna um resumo estatístico dos pedidos.
 
 ---
 
-## Observação Importante: Worker PHP e Alternativa Python
+## Worker Python
 
-### Bug no Worker PHP (AMQPDataReadException)
+O worker Python (`public/worker_health.py`) consome a fila `order_status_updates`, valida mensagens, registra logs e implementa health check, DLQ e graceful shutdown.
 
-Durante a implementação e testes do worker PHP (consumidor RabbitMQ), foi identificado um bug persistente ao rodar o worker em ambiente Docker, mesmo após:
-- Atualização do pacote `php-amqplib/php-amqplib` para a versão 3.x
-- Instalação de todas as extensões e dependências recomendadas (sockets, bcmath, pdo_mysql, zip, unzip, git)
-- Criação de um container dedicado (php:8.1-cli) para o worker
-- Correção de permissões, variáveis de ambiente e rebuild completo do ambiente
-
-O erro apresentado é:
-
-```
-Fatal error: Uncaught PhpAmqpLib\Exception\AMQPDataReadException: Error receiving data in /var/www/vendor/php-amqplib/php-amqplib/PhpAmqpLib/Wire/IO/StreamIO.php:235
-```
-
-Esse bug foi isolado como sendo específico do ambiente PHP + php-amqplib no Docker, pois:
-- O consumo da fila com Python funciona normalmente no mesmo ambiente
-- O worker PHP está aderente ao README e scripts, mas falha ao consumir mensagens
-
-### Alternativa Recomendada: Worker Python
-
-Para garantir a entrega funcional do desafio, recomenda-se utilizar o worker Python (`test_worker_py.py`), que consome a fila `order_status_updates` corretamente e executa o mesmo workflow de validação e log.
-
-O script Python está disponível em `public/test_worker_py.py` e pode ser executado via Docker ou localmente, conforme instruções no próprio arquivo.
-
-#### Justificativa Técnica
-- Todas as tentativas de correção do ambiente PHP foram realizadas e documentadas
-- O bug é reconhecido em fóruns e issues do php-amqplib, sem solução definitiva para o stack Docker atual
-- O uso do worker Python garante aderência ao fluxo do desafio e permite avaliação completa da solução
-
----
-
-**Resumo:**
-- O worker PHP está implementado e documentado, mas apresenta bug de baixo nível no consumo RabbitMQ
-- O worker Python é funcional e recomendado para avaliação e testes
-- Testes automatizados (PHPUnit) implementados para os principais endpoints da API, garantindo aderência ao padrão REST (exemplo: POST /orders retorna HTTP 201)
-
-Em caso de dúvidas ou necessidade de troubleshooting adicional, consulte os comentários no código e scripts de setup.
-
----
-
-## Testes Automatizados e Cobertura REST
-
-### PHPUnit
-Foram implementados testes automatizados utilizando PHPUnit para garantir o correto funcionamento dos endpoints REST, especialmente para o fluxo de criação de pedidos (POST /orders).
-
-#### Como rodar os testes:
-
-1. Instale as dependências de desenvolvimento:
-	```sh
-	composer install
-	```
-2. Execute os testes:
-	```sh
-	php vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/Api/OrdersApiTest.php
-	```
-
-#### O que é validado:
-- O endpoint POST /orders retorna HTTP 201 Created ao criar um pedido (aderente ao padrão REST)
-- O payload de resposta está conforme o esperado
-
-Esses testes garantem a qualidade da API e facilitam a manutenção futura.
-
----
-
-## Como Usar o Worker Python
-
-O worker Python (`test_worker_py.py`) é uma alternativa funcional para consumir a fila `order_status_updates` do RabbitMQ, realizando o mesmo workflow do worker PHP.
-
-### Pré-requisitos
-- Python 3.8+
-- Pacote `pika` instalado (`pip install pika`)
-- Acesso ao RabbitMQ (localhost ou conforme definido no `docker-compose.yml`)
-
-### Execução Local
-1. Instale o pacote necessário:
-	```sh
-	pip install pika
-	```
-2. Execute o script:
-	```sh
-	python public/test_worker_py.py
-	```
-
-### Execução via Docker (opcional)
-Você pode criar um container Python para rodar o worker, se preferir isolar o ambiente:
+**Como executar:**
 ```sh
-docker run --rm -it --network=ipagdesafio_default -v %cd%/public:/app python:3.11 bash -c "pip install pika && python /app/test_worker_py.py"
+docker-compose exec app python public/worker_health.py
 ```
-> No Linux/Mac, troque `%cd%` por `$(pwd)`.
-
-### Logs e Funcionamento
-O worker Python irá consumir mensagens da fila, validar o payload e imprimir logs no terminal, simulando o envio de notificações e registrando o fluxo conforme o esperado pelo desafio.
 
 ---
 
+## Testes Automatizados
 
+Testes automatizados com PHPUnit garantem o correto funcionamento dos endpoints REST.
 
----
-
-## API documentation (Swagger/OpenAPI)
-
-Uma especificação OpenAPI (Swagger) da API está disponível no arquivo `swagger.yaml` na raiz do projeto. Você pode visualizar a documentação interativa usando o site https://editor.swagger.io/:
-
-1. Acesse https://editor.swagger.io/
-2. Clique em "File" > "Import File" e selecione o arquivo `swagger.yaml` deste projeto
-3. Navegue e teste os endpoints da API de forma interativa
-
-Assim, a documentação da API está padronizada e pronta para consulta ou integração com ferramentas externas.
-
----
-
-## Health checks para API e Worker
-
-### API
-O endpoint `/health` foi adicionado. Basta acessar:
-
-```
-GET http://localhost:8080/health
-```
-Resposta esperada:
-```json
-{"status": "ok"}
-```
-
-### Worker Python
-O script `public/worker_health.py` exibe uma mensagem de health check ao iniciar e trata graceful shutdown (Ctrl+C ou SIGTERM). Para testar:
-
-```
-python public/worker_health.py
-```
-Você verá:
-```
-[HEALTH] Worker está rodando e conectado ao RabbitMQ.
-```
-O worker também faz shutdown seguro ao receber sinais do sistema.
-
----
-
-## Rate limiting básico nos endpoints
-
-Todos os endpoints da API possuem rate limiting básico: cada IP pode realizar até 10 requisições por minuto. Se o limite for excedido, a API retorna HTTP 429 com a mensagem:
-
-```json
-{"error": "Rate limit exceeded"}
-```
-
-Esse controle é feito por middleware PHP e pode ser ajustado em `src/Middleware/RateLimitMiddleware.php`.
-
----
-
-## Database Connection Pooling
-
-O projeto utiliza PDO para conexão com o MySQL. O PDO, por padrão, reutiliza conexões enquanto o objeto está ativo, o que já garante pooling básico para a maioria dos cenários web. Para ambientes de alta concorrência, recomenda-se utilizar um pool externo (como ProxySQL ou MySQL Pooler), mas para o escopo do desafio, o pooling do PDO é suficiente e está implementado em `src/Utils/db.php`.
-
----
-
-## Métricas e Monitoramento Básico
-
-Para monitoramento básico, recomenda-se utilizar as métricas do próprio Docker (CPU, memória, logs) e o painel do RabbitMQ (porta 15672). O endpoint `/health` pode ser usado por ferramentas externas (como UptimeRobot, Prometheus ou scripts de monitoramento) para checagem de disponibilidade da API.
-
-Exemplo de uso com `curl` para health check:
+**Como rodar:**
 ```sh
-curl http://localhost:8080/health
+composer install
+php vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/Api/OrdersApiTest.php
 ```
 
 ---
 
-## Collection do Insomnia para Testes
+## Diferenciais Implementados
 
-Uma collection pronta para importação no Insomnia está disponível no arquivo `insomnia_collection.json` na raiz do projeto. Ela cobre os principais endpoints da API:
+- Validação robusta de dados de entrada
+- Logs estruturados no worker Python
+- Documentação Swagger/OpenAPI
+- Health check para API e worker
+- Rate limiting (10 req/min por IP)
+- Dead Letter Queue (DLQ)
+- Graceful shutdown
+- Configuração por ambiente
+- Database connection pooling (PDO)
+- Métricas/monitoramento básico (Docker, health, painel RabbitMQ)
+- Collection Insomnia/Postman para testes
 
-- Health check
-- Criação de pedido
-- Listagem de pedidos
-- Resumo dos pedidos
+---
 
-Para usar:
-1. Abra o Insomnia
-2. Clique em "Import Data" > "From File"
-3. Selecione o arquivo `insomnia_collection.json`
+## Documentação Swagger/OpenAPI
+
+O arquivo `swagger.yaml` na raiz do projeto pode ser importado em https://editor.swagger.io/ para navegação e teste interativo dos endpoints.
+
+---
+
+## Health Check
+
+- **API:** `GET /health` retorna `{ "status": "ok" }`
+- **Worker:** Mensagem de health check ao iniciar e shutdown seguro (Ctrl+C ou SIGTERM)
+
+---
+
+## Rate Limiting
+
+Todos os endpoints possuem rate limiting: 10 requisições por minuto por IP. Excedendo o limite, retorna HTTP 429.
+
+---
+
+## Pooling, Métricas e Monitoramento
+
+- Pooling de conexões: PDO reutiliza conexões ativas.
+- Métricas: utilize Docker, painel RabbitMQ (porta 15672) e endpoint `/health` para monitoramento.
+
+---
+
+## Collection Insomnia/Postman
+
+Importe o arquivo `insomnia_collection.json` no Insomnia para testar todos os endpoints da API.
+
+---
+
+## Decisões Técnicas e Observações
+
+- Worker PHP foi descontinuado devido a bug no consumo RabbitMQ em Docker; worker Python é a solução recomendada.
+- Todas as decisões, alternativas e bugs estão documentados neste README.
+
+---
 4. Execute as requisições conforme desejar
 
 Assim, é possível testar rapidamente todos os fluxos da API também pelo Insomnia.
